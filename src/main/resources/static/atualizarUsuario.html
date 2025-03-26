@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Usuário</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 320px;
+        }
+        input, button {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        a {
+            display: block;
+            margin-top: 10px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Editar Usuário</h2>
+    <form id="editUserForm">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <button type="submit">Salvar Alterações</button>
+    </form>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('id');
+
+    async function fetchUserData() {
+        try {
+            const response = await fetch(`http://localhost:8080/usuarios/${userId}`);
+            const user = await response.json();
+            document.getElementById('nome').value = user.nome;
+            document.getElementById('email').value = user.email;
+        } catch (error) {
+            console.error('Erro ao carregar usuário:', error);
+        }
+    }
+
+    document.getElementById('editUserForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const nome = document.getElementById('nome').value;
+        const email = document.getElementById('email').value;
+
+        try {
+            await fetch(`http://localhost:8080/usuarios/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nome, email })
+            });
+            alert('Usuário atualizado com sucesso!');
+            window.location.href = 'listarUsuarios.html';
+        } catch (error) {
+            console.error('Erro ao atualizar usuário:', error);
+        }
+    });
+
+    fetchUserData();
+</script>
+</body>
+</html>

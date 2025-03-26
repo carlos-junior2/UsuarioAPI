@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Usuários</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .icon {
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        .link {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .link:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+<h2>Lista de Usuários</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Nome</th>
+        <th>Email</th>
+        <th>Data de Cadastro</th>
+        <th>Data de Atualização</th>
+        <th>Ações</th>
+    </tr>
+    </thead>
+    <tbody id="userTableBody">
+    <!-- Os usuários serão inseridos aqui -->
+    </tbody>
+</table>
+
+<br>
+<a class="link" href="index.html">Cadastrar usuário</a>
+<a class="link" href="buscarUsuario.html">Buscar usuário</a>
+
+<script>
+    function formatDateTime(dateTimeString) {
+        const date = new Date(dateTimeString);
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+        const formattedDate = date.toLocaleDateString('pt-BR', options);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${formattedDate} ${hours}:${minutes}`;
+    }
+
+    async function fetchUsers() {
+        try {
+            const response = await fetch('http://localhost:8080/usuarios');
+            const users = await response.json();
+            const tableBody = document.getElementById('userTableBody');
+            tableBody.innerHTML = '';
+            users.forEach(user => {
+                const row = `<tr>
+                    <td>${user.nome}</td>
+                    <td>${user.email}</td>
+                    <td>${formatDateTime(user.dataCadastro)}</td>
+                    <td>${formatDateTime(user.dataAtualizacao)}</td>
+                    <td>
+                        <a href="atualizarUsuario.html?id=${user.id}" class="icon">✏️</a>
+                        <span class="icon" onclick="deleteUser('${user.id}')">❌</span>
+                    </td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        } catch (error) {
+            console.error('Erro ao buscar usuários:', error);
+        }
+    }
+
+    async function deleteUser(userId) {
+        if (confirm('Tem certeza que deseja excluir este usuário?')) {
+            try {
+                const response = await fetch(`http://localhost:8080/usuarios/${userId}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    alert('Usuário excluído com sucesso!');
+                    fetchUsers();
+                } else {
+                    alert('Erro ao excluir usuário.');
+                }
+            } catch (error) {
+                console.error('Erro ao excluir usuário:', error);
+                alert('Erro ao excluir usuário. Verifique o console para mais detalhes.');
+            }
+        }
+    }
+
+    fetchUsers();
+</script>
+</body>
+</html>
